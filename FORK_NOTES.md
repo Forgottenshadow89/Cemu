@@ -1,9 +1,13 @@
 # Notas de este fork (LuismaSP89/Cemu)
 
-Este fork contiene un único cambio funcional respecto a `cemu-project/Cemu`:
+Este fork contiene dos cambios funcionales respecto a `cemu-project/Cemu`:
 
-**Fix: luces/lens flares que atraviesan paredes en ZombiU** (issue upstream
-[cemu-project/Cemu#635](https://github.com/cemu-project/Cemu/issues/635)).
+1. **Fix: luces/lens flares que atraviesan paredes en ZombiU** (issue upstream
+   [cemu-project/Cemu#635](https://github.com/cemu-project/Cemu/issues/635), PR #2047).
+2. **Fix: ZombiU no arranca con la actualización v32 (pantalla negra)** — `src/Cafe/Filesystem/fsc.cpp`:
+   el listado de un directorio combinado base+update se ordena por nombre, como en consola; antes Cemu
+   listaba primero los ficheros de la actualización y el juego indexaba mal sus archivos `.bfz`
+   (PR upstream #2048, rama `fix/fsc-merged-dir-order`).
 
 ## Qué cambia y por qué
 
@@ -38,8 +42,8 @@ queries y espera el resultado del frame actual).
 - `main`: upstream `main` + el fix + este fichero + `workflow_dispatch` en
   `.github/workflows/build_check.yml` (solo para poder lanzar builds a mano en
   el fork).
-- `fix/cpu-occlusion-query-sync`: solo el commit del fix, sobre upstream `main`.
-  Es la rama del pull request upstream.
+- `fix/cpu-occlusion-query-sync`: solo el commit del fix de luces (rama del PR #2047).
+- `fix/fsc-merged-dir-order`: solo el commit del fix de la actualización v32 (rama del PR #2048).
 
 ## Cómo actualizar el fork con el Cemu más reciente (rebase)
 
@@ -52,10 +56,10 @@ cd Cemu
 git remote add upstream https://github.com/cemu-project/Cemu.git
 git fetch upstream
 
-# 1) Rama del fix (para el PR): rebase del único commit sobre upstream/main
-git checkout fix/cpu-occlusion-query-sync
-git rebase upstream/main
-git push --force-with-lease origin fix/cpu-occlusion-query-sync
+# 1) Ramas de los fixes (para los PR): rebase de cada commit sobre upstream/main
+for b in fix/cpu-occlusion-query-sync fix/fsc-merged-dir-order; do
+  git checkout $b && git rebase upstream/main && git push --force-with-lease origin $b
+done
 
 # 2) main del fork: reconstruir = upstream/main + fix + commits propios del fork
 git checkout main
